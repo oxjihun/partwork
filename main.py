@@ -1,23 +1,23 @@
 # 0부터 n까지 number of partitions 반환 3월 12일에 작성함 12쪽 Euler의 Corollary 이용
-def plist(n):
-    memo = [0] * (n + 1)
-    memo[0] = 1
+def list_p(n):
+    memo = [1] + [0] * n
     for i in range(1, n + 1):
-        for j in range(1, int((2 * n / 3) ** 0.5) + 2):
-            temp = i - (j * (3 * j - 1)) // 2
-            if temp >= 0:
-                memo[i] -= ((-1) ** j) * memo[temp]
-            temp = i - (j * (3 * j + 1)) // 2
-            if temp >= 0:
-                memo[i] -= ((-1) ** j) * memo[temp]
+        j, sgn = 1, -1
+        while True:
+            value = i - (j * (3 * j + sgn)) // 2
+            if value >= 0:
+                memo[i] -= ((-1) ** j) * memo[value]
+            else:
+                break
+            j += sgn == 1
+            sgn *= -1
     return memo
 
 
 # parts 수가 m개 이하 (혹은 각 parts가 m이하) / 위에 오일러 아이디어, 생성함수의 역 보고 생각. 이것도 3월 12일 작성
-def plist_bound(n, m):
+def list_p_with_bound(n, m):
     # build polynomial (1-q) * ... * (1-q^m)
-    pol = [0] * (1 + (m * (m + 1)) // 2)
-    pol[0] = 1
+    pol = [1] + [0] * ((m * (m + 1)) // 2)
     for t in range(1, m + 1):
         for s in range((t * (t - 1)) // 2, -1, -1):
             pol[t + s] -= pol[s]
@@ -30,21 +30,33 @@ def plist_bound(n, m):
     return memo
 
 
-glist = plist(1000)  # 글로벌 참조용
+lookup_table = [None] + [list_p_with_bound(1000, m) for m in range(1, 11)]  # 이 테이블의 m열이
 
 
 def objective(n, a, b):
-    if n > a * b:
-        return 0
     if a == 1:
-        return glist[n]
+        return lookup_table[b][n]
     s = 0
-    for i in range(1, b + 1):
-        s += glist[i] * objective(n - a * i, a - 1, b)
+    for i in range(min(n // a, b) + 1):
+        s += lookup_table[b][i] * objective(n - a * i, a - 1, b)
     return s
 
 
-L = plist_bound(20, 3)
-print(L, len(L))
+a = 1
+for b in range(1, 11):
+    print(objective(a * b, a, b))  # 예상한 결과
 
-print(objective(0, 2, 3))
+a = 2
+for b in range(1, 11):
+    print(objective(a * b, a, b))  # OEIS에 없다
+
+a = 3
+for b in range(1, 11):
+    print(objective(a * b, a, b))  # OEIS에 없다
+
+a = 4
+for b in range(1, 11):
+    print(objective(a * b, a, b))  # OEIS에 없다 어 잠깐 왜 시작값이 4지
+
+print(objective(4, 1, 4))
+print(objective(4, 4, 1))
