@@ -45,12 +45,20 @@ def objective(n, a, b):
 
 
 # 값 출력 (Technical)
-"""
+
+import math
+
 N = 10
 objective_table = [[None] * (N + 1) for _ in range(N + 1)]
 for a in range(1, N + 1):
     for b in range(1, N + 1):
-        objective_table[a][b] = objective(a * b, a, b)
+        objective_table[a][b] = int(
+            (
+                math.log(4 * math.sqrt(3) * a * b * objective(a * b, a, b))
+                / (math.pi * math.sqrt(2 / 3))
+            )
+            ** 2
+        )
 for a in range(1, N + 1):
     print(
         " ".join(
@@ -62,7 +70,6 @@ for a in range(1, N + 1):
             ]
         )
     )
-"""
 
 # 3월 13일
 
@@ -103,3 +110,11 @@ def p_rec_parts(n, a, b):
 # print(parts(5))
 for _ in p_rec_parts(9, 3, 3):
     print(_)
+
+
+def check_asym_with_desmos(n):
+    return list(enumerate(list_p(n)))
+
+
+# print(*check_asym_with_desmos(100))
+# \frac{1}{4x\sqrt{3}}e^{\pi\sqrt{\frac{2}{3}x}} desmos로 그려보니 잘 맞는다
