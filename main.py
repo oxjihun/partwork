@@ -45,6 +45,7 @@ def objective(n, a, b):
 
 
 # 값 출력 (Technical)
+"""
 N = 10
 objective_table = [[None] * (N + 1) for _ in range(N + 1)]
 for a in range(1, N + 1):
@@ -61,3 +62,44 @@ for a in range(1, N + 1):
             ]
         )
     )
+"""
+
+# 3월 13일
+
+
+def parts_with_bound(n, b):
+    if n == 0:
+        return [[]]  # 중요
+    if b == 1:  # 모든 조각이 1
+        return [[1] * n]
+    result = []
+    for i in range(min(n, b), 0, -1):  # 가장 큰 조각이 min(n, b)일 때부터 1일 때까지
+        for j in range(n // i, 0, -1):  # 그 조각은 1번부터 n//i번까지 나타날 수 있음
+            # print(n - i * j, i - 1)
+            L = parts_with_bound(n - i * j, i - 1)
+            for partition in L:
+                result.append([i] * j + partition)
+    return result
+
+
+def parts(n):
+    return parts_with_bound(n, n)
+
+
+def p_rec_parts(n, a, b):
+    if a == 1:
+        L = parts_with_bound(n, b)
+        return [[(1, part) for part in partition] for partition in L]
+    result = []
+    for i in range(n // a, -1, -1):  # 큰 값부터
+        L = parts_with_bound(i, b)
+        R = p_rec_parts(n - a * i, a - 1, b)
+        for l in L:
+            for r in R:
+                result.append(list(map(lambda p: (a, p), l)) + r)
+    return result
+
+
+# print(parts(5))
+for _ in p_rec_parts(9, 3, 3):
+    print(_)
