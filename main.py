@@ -54,10 +54,13 @@ for a in range(1, N + 1):
     for b in range(1, N + 1):
         objective_table[a][b] = int(
             (
-                math.log(4 * math.sqrt(3) * a * b * objective(a * b, a, b))
+                math.log(
+                    4 * math.sqrt(3) * (a * b) * objective(a * b, a, b)
+                )  # a+b는 왠지 아닌 것 같다
                 / (math.pi * math.sqrt(2 / 3))
             )
             ** 2
+            / ((a * b) / 1000)
         )
 for a in range(1, N + 1):
     print(
