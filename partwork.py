@@ -22,24 +22,17 @@ def p(n):
 
 
 # 0부터 n까지 분할수 (단, part가 m개 이하)가 담긴 리스트를 반환한다.
-# (1-q) * ... * (1-q^m)이라는 다항식을 먼저 계산한 후 생성함수 계수 비교
-memo_p_with_bound = [None]
-
-
+# (1-q) * ... * (1-q^b)이라는 다항식을 먼저 계산한 후 생성함수 계수 비교
+@cache
 def p_with_bound(n, b):
-    for _ in range(len(memo_p_with_bound), b + 1):
-        memo_p_with_bound.append([1])
-    if n <= len(memo_p_with_bound[b]) - 1:
-        return memo_p_with_bound[b][n]
     pol = [1] + [0] * ((b * (b + 1)) // 2)
     for t in range(1, b + 1):
         for s in range((t * (t - 1)) // 2, -1, -1):
             pol[t + s] -= pol[s]
-    for i in range(1, n + 1):
-        for j in range(1, min(len(pol), i + 1)):
-            memo_p_with_bound[b].append(0)
-            memo_p_with_bound[b][i] -= pol[j] * memo_p_with_bound[b][i - j]
-    return memo_p_with_bound[b][n]
+    ans = 0
+    for j in range(1, min(len(pol), n + 1)):
+        ans -= pol[j] * p_with_bound[b][n - j]
+    return ans
 
 
 # 요주의 값
