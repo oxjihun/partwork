@@ -15,6 +15,24 @@ def list_p(n):
     return memo
 
 
+def list_q(n):
+    memo = [1, -1] + [0] * (n - 1)  # 이거네
+    for i in range(1, n + 1):
+        j, sgn = 1, -1
+        while True:
+            value = i - (j * (3 * j + sgn)) // 2
+            if value >= 0:
+                memo[i] -= ((-1) ** j) * memo[value]
+            else:
+                break
+            j += sgn == 1
+            sgn *= -1
+    return memo
+
+
+print(list_q(10))
+
+
 # 0부터 n까지 분할수 (단, part가 m개 이하)가 담긴 리스트를 반환한다.
 # (1-q) * ... * (1-q^m)이라는 다항식을 먼저 계산한 후 생성함수 계수 비교
 def list_p_with_bound(n, m):
@@ -52,7 +70,8 @@ N = 10
 objective_table = [[None] * (N + 1) for _ in range(N + 1)]
 for a in range(1, N + 1):
     for b in range(1, N + 1):
-        objective_table[a][b] = int(
+        objective_table[a][b] = objective(a * b, a, b)
+        """int(
             (
                 math.log(
                     4 * math.sqrt(3) * (a * b) * objective(a * b, a, b)
@@ -62,6 +81,7 @@ for a in range(1, N + 1):
             ** 2
             / ((a * b) / 1000)
         )
+        """
 for a in range(1, N + 1):
     print(
         " ".join(
