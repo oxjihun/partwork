@@ -2,7 +2,7 @@ from functools import cache
 
 
 # 간단한 다항식 클래스
-class Pol:
+class Polynomial:
     def __init__(self, coefficient):
         self.coef = coefficient
 
@@ -20,7 +20,7 @@ class Pol:
         for i in range(1 + len(self)):
             for j in range(1 + len(other)):
                 L[i + j] += self[i] * other[j]
-        return Pol(L)
+        return Polynomial(L)
 
 
 # 0부터 n까지 분할수가 담긴 리스트를 반환한다.
@@ -48,9 +48,9 @@ def p(n):
 def p_with_bound(n, b):
     if n == 0:
         return 1
-    pol = Pol([1])
+    pol = Polynomial([1])
     for t in range(1, b + 1):
-        pol *= Pol([1] + [0] * (t - 1) + [-1])
+        pol *= Polynomial([1] + [0] * (t - 1) + [-1])
     result = 0
     for j in range(1, min(len(pol), n) + 1):
         result -= pol[j] * p_with_bound(n - j, b)
