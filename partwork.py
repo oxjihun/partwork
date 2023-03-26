@@ -1,61 +1,54 @@
+# https://www.daleseo.com/python-cache/
+from functools import cache
+
+
 # 0부터 n까지 분할수가 담긴 리스트를 반환한다.
 # 'The Theory of Partitions' Corollary 1.8 (Euler)
-def list_p(n):
-    memo = [1] + [0] * n
-    for i in range(1, n + 1):
-        j, sgn = 1, -1
-        while True:
-            value = i - (j * (3 * j + sgn)) // 2
-            if value >= 0:
-                memo[i] -= ((-1) ** j) * memo[value]
-            else:
-                break
-            j += sgn == 1
-            sgn *= -1
-    return memo
-
-
-def list_q(n):
-    memo = [1, -1] + [0] * (n - 1)  # 이거네
-    for i in range(1, n + 1):
-        j, sgn = 1, -1
-        while True:
-            value = i - (j * (3 * j + sgn)) // 2
-            if value >= 0:
-                memo[i] -= ((-1) ** j) * memo[value]
-            else:
-                break
-            j += sgn == 1
-            sgn *= -1
-    return memo
+@cache
+def p(n):
+    if n == 0:
+        return 1
+    ans = 0
+    j, sgn = 1, -1
+    while True:
+        value = n - (j * (3 * j + sgn)) // 2
+        if value >= 0:
+            ans -= ((-1) ** j) * p(value)
+        else:
+            break
+        j += sgn == 1
+        sgn *= -1
+    return ans
 
 
 # 0부터 n까지 분할수 (단, part가 m개 이하)가 담긴 리스트를 반환한다.
 # (1-q) * ... * (1-q^m)이라는 다항식을 먼저 계산한 후 생성함수 계수 비교
-def list_p_with_bound(n, m):
-    pol = [1] + [0] * ((m * (m + 1)) // 2)
-    for t in range(1, m + 1):
+memo_p_with_bound = [None]
+
+
+def p_with_bound(n, b):
+    for _ in range(len(memo_p_with_bound), b + 1):
+        memo_p_with_bound.append([1])
+    if n <= len(memo_p_with_bound[b]) - 1:
+        return memo_p_with_bound[b][n]
+    pol = [1] + [0] * ((b * (b + 1)) // 2)
+    for t in range(1, b + 1):
         for s in range((t * (t - 1)) // 2, -1, -1):
             pol[t + s] -= pol[s]
-    memo = [0] * (n + 1)
-    memo[0] = 1
     for i in range(1, n + 1):
         for j in range(1, min(len(pol), i + 1)):
-            memo[i] -= pol[j] * memo[i - j]
-    return memo
-
-
-lookup_table = [None] + [list_p_with_bound(1000, m) for m in range(1, 31)]  # 참조용 리스트
-print("Built lookup table.")
+            memo_p_with_bound[b].append(0)
+            memo_p_with_bound[b][i] -= pol[j] * memo_p_with_bound[b][i - j]
+    return memo_p_with_bound[b][n]
 
 
 # 요주의 값
 def p_rec(n, a, b):
     if a == 1:
-        return lookup_table[b][n]
+        return p_with_bound(n, b)
     s = 0
     for i in range(n // a + 1):
-        s += lookup_table[b][i] * p_rec(n - a * i, a - 1, b)
+        s += p_with_bound(i, b) * p_rec(n - a * i, a - 1, b)
     return s
 
 
