@@ -1,5 +1,20 @@
-# https://www.daleseo.com/python-cache/
 from functools import cache
+
+
+# 간단한 다항식 클래스
+class Pol:
+    def __init__(self, coefficient):
+        self.coef = coefficient
+
+    def __len__(self):  # 차수 반환
+        return len(self.coef) - 1
+
+    def __mul__(self, other):
+        L = [0] * (1 + len(self) + len(other))
+        for i in range(1 + len(self)):
+            for j in range(1 + len(other)):
+                L[i + j] += self.coef[i] * other.coef[j]
+        return Pol(L)
 
 
 # 0부터 n까지 분할수가 담긴 리스트를 반환한다.
@@ -25,10 +40,9 @@ def p(n):
 # (1-q) * ... * (1-q^b)이라는 다항식을 먼저 계산한 후 생성함수 계수 비교
 @cache
 def p_with_bound(n, b):
-    pol = [1] + [0] * ((b * (b + 1)) // 2)
+    pol = Pol([1])
     for t in range(1, b + 1):
-        for s in range((t * (t - 1)) // 2, -1, -1):
-            pol[t + s] -= pol[s]
+        pol *= Pol([1] + [0] * (t - 1) + [-1])
     ans = 0
     for j in range(1, min(len(pol), n + 1)):
         ans -= pol[j] * p_with_bound[b][n - j]
