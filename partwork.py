@@ -30,9 +30,6 @@ def list_q(n):
     return memo
 
 
-print(list_q(10))
-
-
 # 0부터 n까지 분할수 (단, part가 m개 이하)가 담긴 리스트를 반환한다.
 # (1-q) * ... * (1-q^m)이라는 다항식을 먼저 계산한 후 생성함수 계수 비교
 def list_p_with_bound(n, m):
@@ -53,12 +50,12 @@ print("Built lookup table.")
 
 
 # 요주의 값
-def objective(n, a, b):
+def p_rec(n, a, b):
     if a == 1:
         return lookup_table[b][n]
     s = 0
     for i in range(n // a + 1):
-        s += lookup_table[b][i] * objective(n - a * i, a - 1, b)
+        s += lookup_table[b][i] * p_rec(n - a * i, a - 1, b)
     return s
 
 
@@ -67,14 +64,14 @@ def objective(n, a, b):
 import math
 
 N = 10
-objective_table = [[None] * (N + 1) for _ in range(N + 1)]
+p_rec_table = [[None] * (N + 1) for _ in range(N + 1)]
 for a in range(1, N + 1):
     for b in range(1, N + 1):
-        objective_table[a][b] = objective(a * b, a, b)
+        p_rec_table[a][b] = p_rec(a * b, a, b)
         """int(
             (
                 math.log(
-                    4 * math.sqrt(3) * (a * b) * objective(a * b, a, b)
+                    4 * math.sqrt(3) * (a * b) * p_rec(a * b, a, b)
                 )  # a+b는 왠지 아닌 것 같다
                 / (math.pi * math.sqrt(2 / 3))
             )
@@ -86,9 +83,7 @@ for a in range(1, N + 1):
     print(
         " ".join(
             [
-                ("{:%dd}" % (len(str(objective_table[-1][b])))).format(
-                    objective_table[a][b]
-                )
+                ("{:%dd}" % (len(str(p_rec_table[-1][b])))).format(p_rec_table[a][b])
                 for b in range(1, N + 1)
             ]
         )
