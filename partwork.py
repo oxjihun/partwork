@@ -82,6 +82,7 @@ def parts_with_bound(n, b):
     return result
 
 
+@cache
 def parts(n):
     return parts_with_bound(n, n)
 
