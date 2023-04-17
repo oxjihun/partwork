@@ -5,6 +5,10 @@ import partwork
 
 import math
 
+L = [partwork.p_rec(2 * a, 2, a) for a in range(1, 21)]
+print(", ".join(map(str, L)))
+exit(0)
+
 N = 10
 p_rec_table = [[None] * (N + 1) for _ in range(N + 1)]
 for a in range(1, N + 1):
