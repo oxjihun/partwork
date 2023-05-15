@@ -1,4 +1,5 @@
 from functools import cache
+from copy import deepcopy
 
 
 # 간단한 다항식 클래스
@@ -99,3 +100,56 @@ def parts_rec(n, a, b):
             for r in R:
                 result.append(list(map(lambda p: (a, p), l)) + r)
     return result
+
+
+# https://en.wikipedia.org/wiki/Plane_partition
+# 아이디어: 대각선 방향으로 채우면 되지 않을까?
+
+
+def diag_encode(r, s, i, j):
+    assert 0 <= i < r and 0 <= j < s
+    d, idx = i + j, 0
+    for k in range(d):
+        idx += min(k + 1, r) - max(0, k - s + 1)
+    idx += i - max(0, i + j - s + 1)
+    return idx
+
+
+def diag_decode(r, s, idx):
+    assert 0 <= idx < r * s
+    NotImplemented
+
+
+def diagonal_visit(r, s):
+    for d in range(r + s):
+        for i in range(max(0, d - s + 1), min(d + 1, r)):
+            yield (i, d - i)
+
+
+# 수평 수직이 더 편하다
+
+
+def parts_plane_in_box(n, r, s, t):
+    results = []
+
+    def DFS(n, r, s, t, arr, i, j):
+        if i == r:
+            if n == 0:
+                results.append(deepcopy(arr))
+            return None
+        for k in range(
+            min(
+                n,
+                t,
+                arr[i - 1][j] if i >= 1 else float("inf"),
+                arr[i][j - 1] if j >= 1 else float("inf"),
+            )
+            + 1,
+        ):
+            arr[i][j] = k
+
+            DFS(n - k, r, s, t, arr, i + (j == s - 1), (j + 1) % s)
+        arr[i][j] = 0
+
+    DFS(n, r, s, t, [[0] * s for _ in range(r)], 0, 0)
+    return results
