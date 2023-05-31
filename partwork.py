@@ -129,7 +129,7 @@ def diagonal_visit(r, s):
 # 수평 수직이 더 편하다
 
 
-def parts_plane_in_box(n, r, s, t):
+def parts_plane_boxed(n, r, s, t):
     results = []
 
     def DFS(n, r, s, t, arr, i, j):
@@ -153,3 +153,18 @@ def parts_plane_in_box(n, r, s, t):
 
     DFS(n, r, s, t, [[0] * s for _ in range(r)], 0, 0)
     return results
+
+
+def parts_plane_boxed_tall(n, r, s):  # 높이 제한 x
+    return parts_plane_boxed(n, r, s, n)
+
+
+def parts_rec_encoded(n, r, s):
+    def check_submatrix(arr):
+        for i in range(len(arr) - 1):
+            for j in range(len(arr[0]) - 1):
+                if arr[i][j] + arr[i + 1][j + 1] < arr[i + 1][j] + arr[i][j + 1]:
+                    return False
+        return True
+
+    return list(filter(check_submatrix, parts_plane_boxed_tall(n, r, s)))
