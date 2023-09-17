@@ -168,3 +168,48 @@ def parts_rec_encoded(n, r, s):
         return True
 
     return list(filter(check_submatrix, parts_plane_boxed_tall(n, r, s)))
+
+
+# 2023-09-11
+def overlap(R, a, b):
+    M = [[0] * b for _ in range(a)]
+    for x, y in R:
+        for i in range(x):
+            for j in range(y):
+                M[i][j] += 1
+    return M
+
+
+def delta(M):
+    a, b = len(M), len(M[0])
+    dM = [[0] * b for _ in range(a)]
+    for i in range(a):
+        for j in range(b):
+            dM[i][j] = M[i][j]
+            if i < a - 1:
+                dM[i][j] -= M[i + 1][j]
+            if j < b - 1:
+                dM[i][j] -= M[i][j + 1]
+            if (i < a - 1) and (j < b - 1):
+                dM[i][j] += M[i + 1][j + 1]
+    return dM
+
+
+def separate(M):
+    a, b = len(M), len(M[0])
+    dM = delta(M)
+    R = []
+    for i in range(a):
+        for j in range(b):
+            for _ in range(dM[i][j]):
+                R.append((i, j))
+    return R, a, b
+
+
+def to_tuple(M):
+    return tuple(tuple(_) for _ in M)
+
+
+def format2x2(M):
+    assert len(M) == len(M[0]) == 2
+    return "%s %s\n" * 2 % tuple(M[0] + M[1])
