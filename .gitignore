@@ -1,4 +1,5 @@
 __pycache__
-test.py
 *.txt
+test.py
+test_pt.py
 plot_idea.py
