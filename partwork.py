@@ -1,5 +1,7 @@
 from functools import cache
 from copy import deepcopy
+from fractions import Fraction
+import math
 
 
 # 간단한 다항식 클래스
@@ -22,6 +24,14 @@ class Polynomial:
             for j in range(1 + len(other)):
                 L[i + j] += self[i] * other[j]
         return Polynomial(L)
+
+
+def pol_id():
+    return Polynomial([1])
+
+
+def pol_unit(n):
+    return Polynomial([1] + [0] * (n - 1) + [-1])
 
 
 # 0부터 n까지 분할수가 담긴 리스트를 반환한다.
@@ -49,9 +59,9 @@ def p(n):
 def p_with_bound(n, b):
     if n == 0:
         return 1
-    pol = Polynomial([1])
+    pol = pol_id()
     for t in range(1, b + 1):
-        pol *= Polynomial([1] + [0] * (t - 1) + [-1])
+        pol *= pol_unit(t)
     result = 0
     for j in range(1, min(len(pol), n) + 1):
         result -= pol[j] * p_with_bound(n - j, b)
@@ -66,6 +76,53 @@ def p_rec(n, a, b):
     for i in range(n // a + 1):
         s += p_with_bound(i, b) * p_rec(n - a * i, a - 1, b)
     return s
+
+
+# 생성함수를 이용하여 p_rec을 빠르게 계산하기
+# 위의 p_with_bound(n) 변형
+# 그런데 p_rec과 퍼포먼스가 비슷한 듯
+@cache
+def p_rec_gen(n, a, b):
+    if n == 0:
+        return 1
+    pol = pol_id()
+    for s in range(1, a + 1):
+        for t in range(1, b + 1):
+            pol *= pol_unit(s * t)
+    result = 0
+    for j in range(1, min(len(pol), n) + 1):
+        result -= pol[j] * p_rec_gen(n - j, a, b)
+    return result
+
+
+# Plane Partition 위키백과의 식 구현 시도
+@cache
+def p_plane_boxed_gen(n, r, s, t):
+    if n == 0:
+        return 1
+    num, den = pol_id(), pol_id()
+    for i in range(1, r + 1):
+        for j in range(1, s + 1):
+            num *= pol_unit(i + j + t - 1)
+            den *= pol_unit(i + j - 1)
+    result = num[n] if len(num) >= n else 0
+    for j in range(1, min(len(den), n) + 1):
+        result -= den[j] * p_plane_boxed_gen(n - j, r, s, t)
+    return result
+
+
+# 오, 성공했다! 왜 성립하는지는 잘 모르겠지만...
+# 밑에 더 좋은 식이 있었다...
+
+
+def p_plane_boxed_prod(n, r, s, t):
+    result = Fraction(1, 1)
+    for k in range(1, t + 1):
+        result *= Fraction(
+            math.factorial(r + s + k - 1) * math.factorial(k - 1),
+            math.factorial(r + k - 1) * math.factorial(s + k - 1),
+        )
+    return int(result)
 
 
 def parts_with_bound(n, b):
@@ -213,3 +270,8 @@ def to_tuple(M):
 def format2x2(M):
     assert len(M) == len(M[0]) == 2
     return "%s %s\n" * 2 % tuple(M[0] + M[1])
+
+
+def format2x3(M):
+    assert len(M) == 2 and len(M[0]) == 3
+    return "%s %s %s\n" * 2 % tuple(M[0] + M[1])
