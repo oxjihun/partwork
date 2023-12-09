@@ -1,5 +1,2 @@
 __pycache__
-*.txt
-test.py
-test_pt.py
-plot_idea.py
+results/
